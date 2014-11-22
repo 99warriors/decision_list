@@ -59,8 +59,7 @@ class run_mcmc_f(monotonic_utils.f_base):
 #                if diff_f.accepted:
                 diff_f(theta_and_data.theta)
                 diff_fs.append(diff_f)
-            if False:
-#            if i % 100000 == 0:
+            if i % 500 == 0:
 
                 print 'STEP',i,''
 #                print theta_and_data.informative_df()

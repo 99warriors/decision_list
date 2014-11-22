@@ -246,6 +246,7 @@ class theta_and_data(monotonic_utils.obj_base):
     @property
     def data_p_ls(self):
         def temper(y):
+#            return y
             ans = max(min(y,.99), .01)
             return ans
         return np.array(map(lambda i: temper(np.mean(self.data.y_ns[self.theta.z_ns==i]) if np.sum(self.theta.z_ns==i) > 0 else 0.5), xrange(0,self.theta.L+1)))

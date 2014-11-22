@@ -42,7 +42,7 @@ class simple_map_single_decision_list_predictor_constructor(monotonic_utils.f_ba
     def __init__(self, get_traces_f):
         self.get_traces_f = get_traces_f
 
-#    @caching.read_method_decorator(caching.read_pickle, custom_get_path, 'pickle')
+    @caching.read_method_decorator(caching.read_pickle, custom_get_path, 'pickle')
     @caching.write_method_decorator(caching.write_pickle, custom_get_path, 'pickle')
 #    @caching.default_write_method_decorator
     def __call__(self, data):
