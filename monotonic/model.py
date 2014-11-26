@@ -5,13 +5,13 @@ import monotonic.monotonic.utils as monotonic_utils
 import monotonic.monotonic.distributions as distributions
 import itertools
 import pdb
-import extra_utils as caching
+import python_utils.python_utils.caching as caching
 
 ##### representation of a decision list #####
 
 class reduced_theta(monotonic_utils.obj_base):
     """
-    parameters of model, represents a decision list in that it can be used to predict p(y|x)
+    non-augmented model
     length of rule_f_ls should be 1 less than that of gamma_ls
     """
     @property
@@ -28,37 +28,14 @@ class reduced_theta(monotonic_utils.obj_base):
     
     @property
     def v_ls(self):
+
         def reverse(l):
             return [x for x in reversed(l)]
-        import pdb
-        try:
-            ans = np.exp(np.array(reverse(np.cumsum(reverse(np.log(self.gamma_ls))))))
-        except:
-            pdb.set_trace()
 
-        debug = False
-        if debug:
-            try:
-                for i in range(len(ans)-1):
-                
-                    assert ans[i] > ans[i+1]
-            except:
-                print 'v_ls', ans
-                print 'gamma_ls', self.gamma_ls
-                print reverse(self.gamma_ls)
-                print np.cumsum(reverse(self.gamma_ls))
-                pdb.set_trace()
-        return ans
+        return np.exp(np.array(reverse(np.cumsum(reverse(np.log(self.gamma_ls))))))
 
-    def get_z_n(self, datum):
-        ans = np.argmax(map(lambda rule_f: rule_f(datum), self.rule_f_ls) + [True])
-        return ans
-
-    def by_z_ns(self, var_ns):
-        by_z_ns = [[] for i in xrange(self.L+1)]
-        for (var_n, z_n) in zip(var_ns, self.z_ns):
-            by_z_ns[z_n].append(var_n)
-        return by_z_ns
+    def get_z(self, x):
+        return np.argmax(map(lambda rule_f: rule_f(x), self.rule_f_ls) + [True])
     
     @property
     def rule_f_idx_ls(self):
@@ -69,34 +46,20 @@ class reduced_theta(monotonic_utils.obj_base):
 
 class theta(reduced_theta):
 
-    def __init__(self, rule_f_ls, gamma_ls, w_ns, zeta_ns, data):
-        self.w_ns, self.zeta_ns, self.data = w_ns, zeta_ns, data
+    def __init__(self, rule_f_ls, gamma_ls, w_ns, zeta_ns):
+        self.w_ns, self.zeta_ns, self.data = w_ns, zeta_ns
         reduced_theta.__init__(self, rule_f_ls, gamma_ls)
 
-    @property
-    def support_ls(self):
-        return np.array(map(lambda i: np.sum(self.data.y_ns[self.z_ns==i]), xrange(0,self.L+1)))
-        
-    @property
-    def z_ns(self):
-        return self.z_ns_helper_faster(self.rule_f_idx_ls)
-#        return self.z_ns_helper_faster(self.rule_f_idx_ls)
+    def z_ns(self, x_ns):
+        return self.z_ns_helper(self.rule_f_idx_ls, x_ns)
 
     @caching.hash_cache_method_decorator
-    def z_ns_helper(self, rule_f_idx_ls):
-        return np.array(map(self.get_z_n, self.data.datums))
-
-    @caching.hash_cache_method_decorator
-    def z_ns_helper_faster(self, rule_f_idx_ls):
+    def z_ns_helper(self, rule_f_idx_ls, x_ns):
         # make a num_rules x N matrix.  each rule contributes a row
-        return np.argmax(np.array([rule_f_l.batch_call(self.data) for rule_f_l in self.rule_f_ls]+[np.ones(len(self.data),dtype=bool)]), axis=0)
+        return np.argmax(np.array([rule_f_l.batch_call(x_ns) for rule_f_l in self.rule_f_ls]+[np.ones(len(self.data),dtype=bool)]), axis=0)
     
-    @property
-    def p_ns(self):
-        try:
-            return self.p_ls[self.z_ns]
-        except:
-            pdb.set_trace()
+    def p_ns(self, x_ns):
+        return self.p_ls[self.z_ns]
 
     @property
     def v_ns(self):
@@ -295,10 +258,10 @@ class theta_and_data(monotonic_utils.obj_base):
             support = rule_f.support if not rule_f is None else np.nan
             rep = repr(rule_f) if not rule_f is None else np.nan
             try:
-                ok.append(pd.Series({'rule':asdf, 'pos':pos/float(len(d)), 'support':len(d), 'p':p_l, 'gamma':gamma_l, 'prob':logprob, 'overall_support':support, 'features_in_rule':rep}))
+                ok.append(pd.Series({'rule':asdf, 'pos':pos/float(len(d)), 'supp':len(d), 'p':p_l, 'gamma':gamma_l, 'prob':logprob, 'supp_overall':support, 'z':rep}))
             except ZeroDivisionError:
                 print 'zero'
-                ok.append(pd.Series({'rule':asdf, 'pos':0., 'support':len(d), 'p':p_l, 'gamma':gamma_l, 'prob':logprob, 'overall_support':support, 'features_in_rule':rep}))
+                ok.append(pd.Series({'rule':asdf, 'pos':0., 'supp':len(d), 'p':p_l, 'gamma':gamma_l, 'prob':logprob, 'supp_overall':support, 'z':rep}))
 
         ok.append(pd.Series({'prob':total_prob}))
         return pd.DataFrame(ok)
