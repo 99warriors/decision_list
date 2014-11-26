@@ -3,7 +3,7 @@ import numpy as np
 import fim
 import monotonic.monotonic.utils as monotonic_utils
 import pandas as pd
-import python_utils.python_utils.caching as caching
+import extra_utils as caching
 
 class rule_f(monotonic_utils.f_base):
     """

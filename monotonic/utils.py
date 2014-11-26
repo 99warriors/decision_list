@@ -2,7 +2,7 @@ import monotonic.monotonic.constants as constants
 import numpy as np
 import scipy.stats
 import copy
-import python_utils.python_utils.caching as caching
+import extra_utils as caching
 
 class my_object(object):
 
@@ -56,8 +56,6 @@ class data(obj_base):
             y_ns = [None for i in xrange(len(id_ns))]
         self.id_ns, self.x_ns, self.y_ns = id_ns, np.array(x_ns), np.array(y_ns)
         self.datums = [datum(i,x,y) for (i,x,y) in zip(id_ns, x_ns,y_ns)]
-        import python_utils.python_utils.caching as caching
-        #self.my_hash = hash(caching.get_hash(self))
         self.data_id = data_id
         self.x_names = x_names
 

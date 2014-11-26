@@ -5,7 +5,7 @@ import monotonic.monotonic.utils as monotonic_utils
 import monotonic.monotonic.distributions as distributions
 import itertools
 import pdb
-import python_utils.python_utils.caching as caching
+import extra_utils as caching
 
 ##### representation of a decision list #####
 
@@ -25,12 +25,6 @@ class reduced_theta(monotonic_utils.obj_base):
     @property
     def p_ls(self):
         return np.array(map(monotonic_utils.logistic, self.r_ls))
-        
-#    @property
-#    def p_ls(self):
-#        return map(monotonic_utils.logistic, self.r_ls)
-
-
     
     @property
     def v_ls(self):
@@ -144,7 +138,7 @@ class gamma_ls_given_L_dist(distributions.conditional_vectorized_dist):
         self.horse = distributions.gamma_dist(alpha, beta)
         
     def batch_loglik(self, L, gamma_ls):
-        return 0
+        #return 0
         import pdb
         try:
             return scipy.stats.gamma(a=self.alpha*np.ones(L+1), scale=1./(self.beta*np.ones(L+1))).logpdf(gamma_ls)
@@ -301,10 +295,10 @@ class theta_and_data(monotonic_utils.obj_base):
             support = rule_f.support if not rule_f is None else np.nan
             rep = repr(rule_f) if not rule_f is None else np.nan
             try:
-                ok.append(pd.Series({'rule':asdf, 'pos':pos/float(len(d)), 'supp':len(d), 'p':p_l, 'gamma':gamma_l, 'prob':logprob, 'supp_overall':support, 'z':rep}))
+                ok.append(pd.Series({'rule':asdf, 'pos':pos/float(len(d)), 'support':len(d), 'p':p_l, 'gamma':gamma_l, 'prob':logprob, 'overall_support':support, 'features_in_rule':rep}))
             except ZeroDivisionError:
                 print 'zero'
-                ok.append(pd.Series({'rule':asdf, 'pos':0., 'supp':len(d), 'p':p_l, 'gamma':gamma_l, 'prob':logprob, 'supp_overall':support, 'z':rep}))
+                ok.append(pd.Series({'rule':asdf, 'pos':0., 'support':len(d), 'p':p_l, 'gamma':gamma_l, 'prob':logprob, 'overall_support':support, 'features_in_rule':rep}))
 
         ok.append(pd.Series({'prob':total_prob}))
         return pd.DataFrame(ok)

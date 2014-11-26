@@ -4,7 +4,7 @@ import numpy as np
 import monotonic.monotonic.model as model
 import itertools
 import pandas as pd
-import python_utils.python_utils.caching as caching
+import extra_utils as caching
 import pdb
 
 class classifier(monotonic_utils.f_base):
@@ -24,26 +24,15 @@ class single_decision_list_predictor(classifier):
     def train_info(self):
         return model.theta_and_data(model.theta(self.reduced_theta.rule_f_ls, self.reduced_theta.gamma_ls, None, None, self.train_data), self.train_data).informative_df()
 
-# this is the predictor used for everything.  therefore, write out a custom key_f and path_f for it
-def custom_key_f(identifier, *args, **kwargs):
-    horse = identifier
-    data = args[0]
-    import pdb
-    try:
-        return 'num_steps:%d_alpha:%.2f_beta:%.2f_poissonrate:%.2f_data:%s' % (horse.get_traces_f.num_steps, horse.get_traces_f.theta_dist_constructor.gamma_ls_given_L_dist.alpha, horse.get_traces_f.theta_dist_constructor.gamma_ls_given_L_dist.beta, horse.get_traces_f.theta_dist_constructor.L_dist.rate, data.pretty_print())
-    except:
-        return 'num_steps:%d_alpha:%.2f_beta:%.2f_poissonrate:%.2f_data:%s' % (horse.get_traces_f.num_steps, horse.get_traces_f.theta_dist_constructor.val.gamma_ls_given_L_dist.alpha, horse.get_traces_f.theta_dist_constructor.val.gamma_ls_given_L_dist.beta, horse.get_traces_f.theta_dist_constructor.val.L_dist.rate, data.pretty_print())
-    
-def custom_get_path(identifier, *args, **kwargs):
-    return '%s/%s/%s' % (caching.cache_folder, 'predictors', custom_key_f(identifier, *args, **kwargs))
+
         
 class simple_map_single_decision_list_predictor_constructor(monotonic_utils.f_base):
 
     def __init__(self, get_traces_f):
         self.get_traces_f = get_traces_f
 
-    @caching.read_method_decorator(caching.read_pickle, custom_get_path, 'pickle')
-    @caching.write_method_decorator(caching.write_pickle, custom_get_path, 'pickle')
+#    @caching.read_method_decorator(caching.read_pickle, custom_get_path, 'pickle')
+#    @caching.write_method_decorator(caching.write_pickle, custom_get_path, 'pickle')
 #    @caching.default_write_method_decorator
     def __call__(self, data):
 
